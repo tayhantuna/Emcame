@@ -9,6 +9,7 @@
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
+    
 }
 
 header {
@@ -47,6 +48,7 @@ button {
     padding: 10px 20px;
     cursor: pointer;
     border-radius: 5px;
+    margin-bottom: 10px;
 }
 
 ul {
@@ -84,14 +86,73 @@ li {
     border-bottom-left-radius: 5px;
     border-bottom-right-radius: 5px;
 }
-input[type="file"] {
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    padding: 10px 20px;
-    cursor: pointer;
-    border-radius: 5px;
+
+        /* Stil vermek için */
+#images-list,
+#videos-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
 }
+
+/* Resim ve video içeriğinin boyutunu ayarlamak için */
+#images-list li,
+#videos-list li {
+    flex: 0 0 calc(50% - 20px);
+    max-width: calc(50% - 20px);
+}
+
+/* Video konteynerinin boyutunu ayarlamak için */
+.video-container {
+    position: relative;
+    width: 100%;
+}
+
+/* Video boyutunu ayarlamak için */
+.video-container video {
+    width: 100%;
+}
+
+/* Video açıklamasını eklemek için */
+.video-container .caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: rgba(230, 235, 255, 0.7);
+    color: #000;
+    padding: 5px;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+/* Resim konteynerinin boyutunu ayarlamak için */
+.image-container {
+    position: relative;
+    width: 100%;
+}
+
+/* Resim boyutunu ayarlamak için */
+.image-container img {
+    width: 100%;
+    height: auto;
+}
+
+/* Resim açıklamasını eklemek için */
+.image-container .caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: rgba(230, 235, 255, 0.7);
+    color: #000;
+    padding: 5px;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+        #appindoor{
+            display: flex;
+        }
     </style>
     
 </head>
@@ -101,12 +162,31 @@ input[type="file"] {
         <div id="user-div"></div>
     </header>
     <div id="app">
+        
+        <button type="submit"onclick="change(1)">Resim bölümüne geç</button>
+        <button type="submit" onclick="change(0)">Video bölümüne geç</button>
+        <div id="appindoor">
+        
+        <section id="im">
         <form id="add-image-form">
             <input type="file" id="image-file" accept="image/*" required>
             <input type="text" id="image-caption" placeholder="Açıklama girin...">
             <button type="submit">Resmi Paylaş</button>
         </form>
         <ul id="images-list"></ul>
+        
+    
+</section >
+    <section id="vi">
+    <form id="add-video-form">
+    <input type="file" id="video-file" accept="video/*" required>
+    <input type="text" id="video-caption" placeholder="Açıklama girin...">
+    <button type="submit">Videoyu Paylaş</button>
+</form>
+<ul id="videos-list"></ul>
+    </section>
+            </div>
+            
     </div>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.6/firebase-app.js";
@@ -168,6 +248,63 @@ const firebaseConfig = {
             `;
             imagesList.appendChild(li);
         }
+
+        // Video yükleme formunu dinle
+const videoForm = document.querySelector('#add-video-form');
+videoForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const file = videoForm['video-file'].files[0];
+    const caption = videoForm['video-caption'].value; // Açıklama alınıyor
+    const fileRef = ref(storage, file.name);
+    await uploadBytes(fileRef, file);
+    const downloadURL = await getDownloadURL(fileRef);
+    await addDoc(collection(db, 'videos'), {
+        videoURL: downloadURL,
+        caption: caption // Açıklama veritabanına ekleniyor
+    });
+    videoForm.reset();
+});
+
+// Firebase'deki videoları dinle ve listele
+const videosList = document.querySelector('#videos-list');
+onSnapshot(collection(db, 'videos'), (snapshot) => {
+    videosList.innerHTML = '';
+    snapshot.forEach(doc => {
+        renderVideo(doc.data(), doc.id);
+    });
+});
+
+// Videoyu render et
+function renderVideo(video, id) {
+    const li = document.createElement('li');
+    li.setAttribute('data-id', id);
+    li.innerHTML = `
+        <div class="video-container">
+            <video controls>
+                <source src="${video.videoURL}" type="video/mp4">
+                Tarayıcınız video etiketini desteklemiyor.
+            </video>
+            <div class="caption">${video.caption}</div>
+        </div>
+    `;
+    videosList.appendChild(li);
+}
+        
     </script>
+    <script >
+        document.getElementById("im").style.visibility = "visible";
+        document.getElementById("vi").style.visibility = "hidden"; 
+       function change(sira) {
+    if (sira == 1) {
+        document.getElementById("im").style.visibility = "visible";
+        document.getElementById("vi").style.visibility = "hidden"; 
+    }
+    if (sira == 0) {
+        document.getElementById("im").style.visibility = "hidden";
+        document.getElementById("vi").style.visibility = "visible"; 
+    }
+        }
+    </script>
+    
 </body>
 </html>
