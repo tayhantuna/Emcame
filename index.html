@@ -214,12 +214,17 @@ const firebaseConfig = {
         });
 
         // Firebase'deki resimleri dinle ve listele
-        const imagesList = document.querySelector('#images-list');
+        let imagesList = document.querySelector('#images-list');
         onSnapshot(collection(db, 'images'), (snapshot) => {
             imagesList.innerHTML = '';
             snapshot.forEach(doc => {
                 renderImage(doc.data(), doc.id);
             });
+            
+// Resimleri Fisher-Yates algoritmasıyla karıştır
+ imagesList = document.querySelector('#images-list');
+const images = Array.from(imagesList.children);
+shuffleArray(images).forEach(image => imagesList.appendChild(image));
         });
 
         // Resmi render et
@@ -252,12 +257,17 @@ videoForm.addEventListener('submit', async (e) => {
 });
 
 // Firebase'deki videoları dinle ve listele
-const videosList = document.querySelector('#videos-list');
+let videosList = document.querySelector('#videos-list');
 onSnapshot(collection(db, 'videos'), (snapshot) => {
     videosList.innerHTML = '';
     snapshot.forEach(doc => {
         renderVideo(doc.data(), doc.id);
     });
+    
+// Videoları Fisher-Yates algoritmasıyla karıştır
+ videosList = document.querySelector('#videos-list');
+const videos = Array.from(videosList.children);
+shuffleArray(videos).forEach(video => videosList.appendChild(video));
 });
 
 // Videoyu render et
@@ -274,8 +284,17 @@ function renderVideo(video, id) {
         </div>
     `;
     videosList.appendChild(li);
+    
 }
-        
+                // Fisher-Yates karıştırma algoritması
+function shuffleArray(array) {
+    const shuffledArray = [...array]; // Diziyi kopyalayarak başlayalım
+    for (let i = shuffledArray.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1)); // 0 ile i arasında rastgele bir indeks seç
+        [shuffledArray[i], shuffledArray[j]] = [shuffledArray[j], shuffledArray[i]]; // Elemanları yer değiştir
+    }
+    return shuffledArray; // Karıştırılmış diziyi döndür
+}
     </script>
     <script >
         document.getElementById("im").style.display = "grid";
@@ -290,6 +309,9 @@ function renderVideo(video, id) {
         document.getElementById("vi").style.display = "grid"; 
     }
         }
+
+
+
     </script>
     
 </body>
