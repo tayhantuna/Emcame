@@ -9,22 +9,21 @@
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    
 }
 
 header {
-    background-color: #333;
+    background-color: #007bff;
     color: #fff;
     padding: 20px;
     text-align: center;
+    margin-bottom: 20px;
+    border-radius: 16px;
 }
 
 h1 {
     margin: 0;
 }
-section{
-    width:50%;
-}
+
 main {
     display: flex;
     justify-content: space-between;
@@ -35,7 +34,9 @@ form {
     margin-bottom: 20px;
 }
 
-input[type="file"], input[type="text"], textarea {
+input[type="file"],
+input[type="text"],
+textarea {
     margin-bottom: 10px;
     width: 100%;
     padding: 10px;
@@ -65,16 +66,18 @@ li {
     border-radius: 5px;
 }
 
-.image-container {
+.image-container,
+.video-container {
     position: relative;
+    width: 100%;
 }
 
-.image-container img {
-    height: 200px;
-    display: block;
+.image-container img,
+.video-container video {
+    width: 100%;
+    height: auto;
     border-radius: 16px;
-    width: 200px;
-    
+    transition: transform 0.3s ease-in-out;
 }
 
 .caption {
@@ -82,84 +85,61 @@ li {
     bottom: 0;
     left: 0;
     width: 100%;
-    background-color: rgb(230, 235, 255, 0.7);
-    color: #000000;
+    background-color: rgba(230, 235, 255, 0.7);
+    color: #000;
     padding: 5px;
     border-bottom-left-radius: 5px;
     border-bottom-right-radius: 5px;
-    margin-bottom:20px;
+    margin-bottom: 20px;
+    transition: opacity 0.3s ease-in-out;
+    opacity: 0;
 }
 
-        /* Stil vermek için */
+/* Açıklamaları görünür hale getir */
+.image-container:hover .caption,
+.video-container:hover .caption {
+    opacity: 1;
+}
+
+/* Resim ve video içeriğinin üzerine gelindiğinde büyüme efekti */
+.image-container img:hover,
+.video-container video:hover {
+    transform: scale(1.05);
+}
+
 #images-list,
 #videos-list {
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
+    justify-content: flex-start; /* Öğeleri sola hizala */
 }
 
-/* Resim ve video içeriğinin boyutunu ayarlamak için */
 #images-list li,
 #videos-list li {
     flex: 0 0 calc(50% - 20px);
     max-width: calc(50% - 20px);
-}
-
-/* Video konteynerinin boyutunu ayarlamak için */
-.video-container {
     position: relative;
-    width: 100%;
+    overflow: hidden;
 }
 
-/* Video boyutunu ayarlamak için */
-.video-container video {
-    width: 100%;
-    height:75%;
-}
-
-/* Video açıklamasını eklemek için */
-.video-container .caption {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background-color: rgba(230, 235, 255, 0.7);
-    color: #000;
-    padding: 5px;
-    border-bottom-left-radius: 5px;
-    border-bottom-right-radius: 5px;
-    margin-bottom:20px;
-}
-
-/* Resim konteynerinin boyutunu ayarlamak için */
-.image-container {
-    position: relative;
-    width: 100%;
-}
-
-/* Resim boyutunu ayarlamak için */
-.image-container img {
+/* TikTok benzeri video stilini uygula */
+#videos-list li video {
     width: 100%;
     height: auto;
+    border-radius: 16px;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.1); /* Gölge efekti ekle */
 }
 
-/* Resim açıklamasını eklemek için */
-.image-container .caption {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background-color: rgba(230, 235, 255, 0.7);
-    color: #000;
-    padding: 5px;
-    border-bottom-left-radius: 5px;
-    border-bottom-right-radius: 5px;
-    margin-bottom:20px;
+#videos-list li .caption {
+    padding: 10px; /* Açıklama alanını genişlet */
+    background-color: rgba(0, 0, 0, 0.5); /* Arka plan rengini ayarla */
+    color: #fff; /* Metin rengini beyaz yap */
+    font-size: 14px; /* Metin boyutunu ayarla */
+    border-radius: 0 0 16px 16px; /* Köşeleri yuvarla */
 }
-        #appindoor{
-            display: flex;
-        }
     </style>
+    
     
 </head>
 <body>
@@ -298,16 +278,16 @@ function renderVideo(video, id) {
         
     </script>
     <script >
-        document.getElementById("im").style.visibility = "visible";
-        document.getElementById("vi").style.visibility = "hidden"; 
+        document.getElementById("im").style.display = "grid";
+        document.getElementById("vi").style.display = "none"; 
        function change(sira) {
     if (sira == 1) {
-        document.getElementById("im").style.visibility = "visible";
-        document.getElementById("vi").style.visibility = "hidden"; 
+        document.getElementById("im").style.display = "grid";
+        document.getElementById("vi").style.display = "none"; 
     }
     if (sira == 0) {
-        document.getElementById("im").style.visibility = "hidden";
-        document.getElementById("vi").style.visibility = "visible"; 
+        document.getElementById("im").style.display = "none";
+        document.getElementById("vi").style.display = "grid"; 
     }
         }
     </script>
