@@ -53,7 +53,9 @@ button {
     border-radius: 5px;
     margin-bottom: 10px;
 }
-
+button:hover {
+    background-color: #0000ff;
+}
 ul {
     list-style-type: none;
     padding: 0;
@@ -93,13 +95,10 @@ li {
     margin-bottom: 20px;
     transition: opacity 0.3s ease-in-out;
     opacity: 0;
+    display: none;
 }
 
-/* Açıklamaları görünür hale getir */
-.image-container:hover .caption,
-.video-container:hover .caption {
-    opacity: 1;
-}
+
 
 /* Resim ve video içeriğinin üzerine gelindiğinde büyüme efekti */
 .image-container img:hover,
@@ -177,7 +176,7 @@ li {
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.6/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.6.6/firebase-analytics.js";
-        import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.6.6/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot,setDoc, getDoc, updateDoc, query,where,getDocs } from "https://www.gstatic.com/firebasejs/9.6.6/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.6.6/firebase-storage.js";
 
         // For Firebase JS SDK v7.20.0 and later, measurementId is optional
@@ -220,7 +219,6 @@ const firebaseConfig = {
             snapshot.forEach(doc => {
                 renderImage(doc.data(), doc.id);
             });
-            
 // Resimleri Fisher-Yates algoritmasıyla karıştır
  imagesList = document.querySelector('#images-list');
 const images = Array.from(imagesList.children);
@@ -233,10 +231,28 @@ shuffleArray(images).forEach(image => imagesList.appendChild(image));
             li.setAttribute('data-id', id);
             li.innerHTML = `
                 <div class="image-container">
-                    <img src="${image.imageURL}" alt="Uploaded Image">
-                    <div class="caption">${image.caption}</div>
-                </div>
+    <img src="${image.imageURL}" alt="Uploaded Image">
+    <div class="caption">${image.caption}</div>
+    <div class="interaction">
+    <button class="comment-btn" data-id="${id}">Yorum</button> 
+</div>
+    <div class="comment-section" style="display: none;">
+    <input type="text" class="comment-input" placeholder="Yorumunuzu girin...">
+    <button class="comment-send-btn" data-id="${id}">Gönder</button>
+    <div class="comments"></div>
+</div>
+
             `;
+      var  img  = li.querySelector('img');   
+var button2 = li.querySelector('.comment-btn');
+ var button3 = li.querySelector('.comment-send-btn');
+     img.addEventListener('click', function() {
+    toggleCaptionVisibility(this);
+});
+            button2.addEventListener('click', handleCommentButtonClick);
+            button3.addEventListener('click', handleCommentSendButtonClick);
+            
+    
             imagesList.appendChild(li);
         }
 
@@ -263,7 +279,6 @@ onSnapshot(collection(db, 'videos'), (snapshot) => {
     snapshot.forEach(doc => {
         renderVideo(doc.data(), doc.id);
     });
-    
 // Videoları Fisher-Yates algoritmasıyla karıştır
  videosList = document.querySelector('#videos-list');
 const videos = Array.from(videosList.children);
@@ -276,16 +291,32 @@ function renderVideo(video, id) {
     li.setAttribute('data-id', id);
     li.innerHTML = `
         <div class="video-container">
-            <video controls>
-                <source src="${video.videoURL}" type="video/mp4">
-                Tarayıcınız video etiketini desteklemiyor.
-            </video>
-            <div class="caption">${video.caption}</div>
-        </div>
+    <video controls>
+        <source src="${video.videoURL}" type="video/mp4">
+        Tarayıcınız video etiketini desteklemiyor.
+    </video>
+    <div class="caption">${video.caption}</div>
+    <div class="interaction">
+        <button class="comment-btn" data-id="${id}">Yorum</button>
+    </div>
+    <div class="comment-section" style="display: none;">
+    <input type="text" class="comment-input" placeholder="Yorumunuzu girin...">
+    <button class="comment-send-btn" data-id="${id}">Gönder</button>
+    <div class="comments"></div>
+</div>
     `;
+    var button2 = li.querySelector('.comment-btn');
+ var button3 = li.querySelector('.comment-send-btn');
+            var  img  = li.querySelector('video');   
+            button2.addEventListener('click', handleCommentButtonClick);
+            button3.addEventListener('click', handleCommentSendButtonClick);
+    img.addEventListener('click', function() {
+    toggleCaptionVisibility(this);
+});
+    
     videosList.appendChild(li);
     
-}
+        }
                 // Fisher-Yates karıştırma algoritması
 function shuffleArray(array) {
     const shuffledArray = [...array]; // Diziyi kopyalayarak başlayalım
@@ -295,11 +326,65 @@ function shuffleArray(array) {
     }
     return shuffledArray; // Karıştırılmış diziyi döndür
 }
+    
+
+
+
+
+
+
+// Yorum butonları için olay işleyicisi fonksiyonu
+function handleCommentButtonClick(e) {
+    const id = e.target.getAttribute('data-id');
+    const commentSection = document.querySelector(`[data-id="${id}"] .comment-section`);
+    commentSection.style.display = commentSection.style.display === 'none' ? 'block' : 'none';
+
+    const commentsContainer = document.querySelector(`[data-id="${id}"] .comments`);
+    commentsContainer.innerHTML = ''; // Önceki yorumları temizle (isteğe bağlı)
+
+    const commentsRef = collection(db, 'comments');
+    const queryRef = query(commentsRef, where('mediaId', '==', id)); // Sorgu oluşturuluyor
+    getDocs(queryRef)
+        .then(snapshot => {
+            snapshot.forEach(doc => {
+                const commentData = doc.data();
+                const commentElement = document.createElement('div');
+                commentElement.textContent = commentData.comment;
+                commentsContainer.appendChild(commentElement);
+            });
+        })
+        .catch(error => {
+            console.error("Mevcut yorumları alma işlemi başarısız oldu:", error);
+        });
+}
+
+
+// Comment Send Button Click Handler
+function handleCommentSendButtonClick(e) {
+    const id = e.target.getAttribute('data-id');
+    const commentInput = document.querySelector(`[data-id="${id}"] .comment-input`);
+    const comment = commentInput.value;
+    const mediaId = id; // Medya ID'sini al
+    const commentsRef = collection(db, 'comments'); // Yorumlar koleksiyon referansını al
+    addDoc(commentsRef, { mediaId: mediaId, comment: comment }) // Belge ekleyerek yorumu kaydet
+        .then((docRef) => {
+            commentInput.value = ''; // Girdi alanını temizle
+            console.log(`Resim veya video ID ${mediaId} için yorum eklendi: ${comment}`);
+        })
+        .catch(error => {
+            console.error("Yorum gönderme işlemi başarısız oldu:", error);
+        });
+}
+// Resmi veya videoyu tıkladığında caption'ın görünürlüğünü değiştiren fonksiyon
+        
+
     </script>
-    <script >
-        document.getElementById("im").style.display = "grid";
-        document.getElementById("vi").style.display = "none"; 
-       function change(sira) {
+    
+    <script>
+        
+        change(1);
+       // Resim bölümüne geçme işlemini gerçekleştiren fonksiyon
+function change(sira) {
     if (sira == 1) {
         document.getElementById("im").style.display = "grid";
         document.getElementById("vi").style.display = "none"; 
@@ -308,10 +393,19 @@ function shuffleArray(array) {
         document.getElementById("im").style.display = "none";
         document.getElementById("vi").style.display = "grid"; 
     }
+}
+        function toggleCaptionVisibility(img) {
+    const caption = img.parentNode.querySelector('.caption');
+    if (caption) {
+        if (caption.style.opacity === '0' || caption.style.opacity === '') {
+            caption.style.opacity = '1';
+            caption.style.display = 'block';
+        } else {
+            caption.style.opacity = '0';
+            caption.style.display = 'none';
         }
-
-
-
+    }
+        }
     </script>
     
 </body>
