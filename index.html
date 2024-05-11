@@ -97,7 +97,7 @@ li {
     border-bottom-right-radius: 5px;
     margin-bottom: 20px;
     transition: opacity 0.3s ease-in-out;
-    opacity: 0;
+    opacity: 1;
     display: none;
 }
 
@@ -140,6 +140,12 @@ li {
     font-size: 14px; /* Metin boyutunu ayarla */
     border-radius: 0 0 16px 16px; /* Köşeleri yuvarla */
 }
+        #search-div{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+        }
     </style>
     
     
@@ -150,6 +156,11 @@ li {
         <div id="user-div"></div>
     </header>
     <div id="app">
+        <div id="search-div">
+        <!-- Arama alanı ekleyelim -->
+<input type="text" id="search-input" placeholder="Arama yap...">
+<button onclick="searchContent()">Ara</button>
+        </div>
         
         <button type="submit"onclick="change(1)">Resim bölümüne geç</button>
         <button type="submit" onclick="change(0)">Video bölümüne geç</button>
@@ -249,8 +260,9 @@ shuffleArray(images).forEach(image => imagesList.appendChild(image));
       var  img  = li.querySelector('img');   
 var button2 = li.querySelector('.comment-btn');
  var button3 = li.querySelector('.comment-send-btn');
+          var  captions = li.querySelector('.caption');
      img.addEventListener('click', function() {
-    toggleCaptionVisibility(this);
+    toggleCaptionVisibility(captions);
 });
             button2.addEventListener('click', handleCommentButtonClick);
             button3.addEventListener('click', handleCommentSendButtonClick);
@@ -294,14 +306,17 @@ function renderVideo(video, id) {
     li.setAttribute('data-id', id);
     li.innerHTML = `
         <div class="video-container">
+        
     <video controls>
         <source src="${video.videoURL}" type="video/mp4">
         Tarayıcınız video etiketini desteklemiyor.
     </video>
     <div class="caption">${video.caption}</div>
     <div class="interaction">
+    
         <button class="comment-btn" data-id="${id}">Yorum</button>
     </div>
+    
     <div class="comment-section" style="display: none;">
     <input type="text" class="comment-input" placeholder="Yorumunuzu girin...">
     <button class="comment-send-btn" data-id="${id}">Gönder</button>
@@ -309,14 +324,14 @@ function renderVideo(video, id) {
 </div>
     `;
     var button2 = li.querySelector('.comment-btn');
- var button3 = li.querySelector('.comment-send-btn');
-            var  img  = li.querySelector('video');   
+ var button3 = li.querySelector('.comment-send-btn');   
             button2.addEventListener('click', handleCommentButtonClick);
             button3.addEventListener('click', handleCommentSendButtonClick);
-    img.addEventListener('click', function() {
-    toggleCaptionVisibility(this);
+   var video = li.querySelector('.video-container');
+    var  captions = li.querySelector('.caption');
+     video.addEventListener('click', function() {
+    toggleCaptionVisibility(captions);
 });
-    
     videosList.appendChild(li);
     
         }
@@ -330,7 +345,6 @@ function shuffleArray(array) {
     return shuffledArray; // Karıştırılmış diziyi döndür
 }
     
-
 
 
 
@@ -397,8 +411,8 @@ function change(sira) {
         document.getElementById("vi").style.display = "grid"; 
     }
 }
-        function toggleCaptionVisibility(img) {
-    const caption = img.parentNode.querySelector('.caption');
+        function toggleCaptionVisibility(media) {
+    const caption = media
     if (caption) {
         if (caption.style.opacity === '0' || caption.style.opacity === '') {
             caption.style.opacity = '1';
@@ -409,6 +423,20 @@ function change(sira) {
         }
     }
         }
+        function searchContent() {
+    const searchInput = document.getElementById('search-input').value.toLowerCase(); // Kullanıcının girdiği metni al
+    const allContent = document.querySelectorAll('.caption'); // Tüm içeriklerin başlıklarını seç
+    allContent.forEach(content => {
+        const captionText = content.textContent.toLowerCase(); // İçerik başlığını küçük harfe dönüştür
+        if (captionText.includes(searchInput)) {
+            content.parentNode.parentNode.style.display = 'block'; // Eğer metin içerik başlığında bulunuyorsa göster
+        } else {
+            content.parentNode.parentNode.style.display = 'none'; // Değilse gizle
+        }
+    });
+            
+        }
+        
     </script>
     
 </body>
